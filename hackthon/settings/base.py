@@ -60,11 +60,12 @@ SIMPLEUI_ANALYSIS = False
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp-mail.outlook.com'
-EMAIL_HOST_USER = 'huangzx_berkeley@outlook.com'
-EMAIL_HOST_PASSWORD = 'zixun363837'
+EMAIL_HOST_USER = 'huangzx_berkeley@outlook.com' #huangzx_berkeley@outlook.com
+EMAIL_HOST_PASSWORD = 'zixun363837' #zixun363837
 EMAIL_PORT = 587
 EMAIL_FROM = 'huangzx_berkeley@outlook.com'
 DEFAULT_FROM_EMAIL = 'huangzx_berkeley@outlook.com'
+RECIPIENT_ADDRESS = 'weiyu_feng@berkeley.edu'
 # DEFAULT_TO_EMAIL = EMAIL_HOST_USER
 EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/'
 
@@ -77,7 +78,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 4,
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    'EXCEPTION_HANDLER': 'authsys.utils.exception_handler',
+    # 'EXCEPTION_HANDLER': 'authsys.utils.exception_handler',
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }
 
