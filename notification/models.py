@@ -5,15 +5,15 @@ import uuid
 from django.db import models
 
 
-def ZeroPosition():
-    return {
-        'x':  0,
-        'y':  0,
-        'z':  0,
-        'rx': 0,
-        'ry': 0,
-        'rz': 0,
-    }
+# def ZeroPosition():
+#     return {
+#         'x':  0,
+#         'y':  0,
+#         'z':  0,
+#         'rx': 0,
+#         'ry': 0,
+#         'rz': 0,
+#     }
 
 # Create your models here.
 class Mail(models.Model):
