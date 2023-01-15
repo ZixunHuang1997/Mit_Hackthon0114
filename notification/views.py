@@ -13,6 +13,7 @@ import json
 from .serializers import serialize_mail
 import os
 import time
+from django.http import QueryDict
 
 
 # Create your views here.
@@ -102,11 +103,18 @@ class NotificationBoard(views.APIView): # open notification board
         return JsonResponse({'status': status.HTTP_200_OK})
 
 class NewEmail(views.APIView): # post a new mail
+    # def get(self)
     def post(self, request, format=None):
         # send email
-        print(request.data)
-        subject = request.data.get('subject','Untitled')
-        message = request.data.get('message','Empty Message')
+        mail_content = request.data
+        print(mail_content)
+        
+        # mail_content = json.loads(json.dumps(mail_content))
+        # print(mail_content.keys())
+
+
+        subject = mail_content.get('subject','Reality')
+        message = mail_content.get('message','Hack!!! snap drag!!')
         mailSend(subject=subject, message=message)
         # build database
         # try:

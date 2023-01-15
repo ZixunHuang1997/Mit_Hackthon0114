@@ -43,6 +43,7 @@ public class HTTPRequester_CloudUpdate : MonoBehaviour
                     Debug.Log(
                         JObject.Parse(res.ToString())["unread_preview"]
                     ); 
+                    
                 });
             }
         });
