@@ -9,6 +9,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .models import Mail
 from rest_framework.exceptions import APIException
+import json
+from .serializers import UnreadMailSerializer
 
 
 # Create your views here.
@@ -18,7 +20,7 @@ def openNotification_deep():
     print('openNotification!Deep!')
 
 def mailSend(subject='A cool subject',
-             message='A stunning message'): #postman-->backend-->database
+             message='A stunning message'): # postman-->backend-->database
     send_mail(
         subject=subject,
         message=message,
@@ -26,9 +28,9 @@ def mailSend(subject='A cool subject',
         recipient_list=[settings.RECIPIENT_ADDRESS])
     print('mailSend!')
 
-def unreadMailInfo(readall=False): # return num of mails; content of mails;
-    unreads = Mail.objects.filter(unread = True).order_by('id_code')
-    if readall:
+def unreadMailInfo(request): # return num of unread mails; content of these mails;
+    unreads = Mail.objects.filter(unread = True).order_by('created_at')
+    if json.loads(request.body.get('readall', False)):
         try:
             with transaction.atomic():
                 for item in unreads:
@@ -36,12 +38,20 @@ def unreadMailInfo(readall=False): # return num of mails; content of mails;
                     item.save()
         except Exception as e:
             raise APIException(str(e))
+        
+    return JsonResponse({
+        'status': status.HTTP_200_OK,
+        'id': mail_item.id_code,
+        'subject': mail_item.name,
+        'message': mail_item.content,
+        'unread': mail_item.unread,
+    })
 
 
-# def checkNewMail():
+# def checkNewMail(): # return whether here is a new mail or not
 
 
-class Notify(views.APIView):
+class NotificationBoard(views.APIView): # open notification board
     def post(self, request, format=None):
         print(request.data)
         if request.data.get('deep', False):
@@ -50,7 +60,7 @@ class Notify(views.APIView):
             openNotification_deep()
         return JsonResponse({'status': status.HTTP_200_OK})
 
-class Email(views.APIView):
+class NewEmail(views.APIView): # post a new mail
     def post(self, request, format=None):
         # send email
         print(request.data)
@@ -76,7 +86,21 @@ class Email(views.APIView):
             'unread': mail_item.unread,
         })
 
+# class UnreadViewSet(
+#     mixins.RetrieveModelMixin,
+#     # mixins.ListModelMixin,
+#     viewsets.GenericViewSet,
+#     mixins.UpdateModelMixin,
+#     mixins.CreateModelMixin):
+#     queryset = Mail.objects.all()
+#     serializer_class = MailSerializer
+#     filter_class = MailFilter
+#     permission_classes = [permissions.AllowAny]
 
+#     def create(self, request, *args, **kwargs):
+#         category = request.data['category']
+#         try:
+#             with transaction.atomic():
 
 # class MailViewSet(
 #     mixins.RetrieveModelMixin,
