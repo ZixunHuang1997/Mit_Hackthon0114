@@ -10,13 +10,26 @@ from django.conf import settings
 from .models import Mail
 from rest_framework.exceptions import APIException
 import json
-from .serializers import UnreadMailSerializer
+from .serializers import serialize_mail
+import os
+import time
 
 
 # Create your views here.
 def openNotification():
+    os.system('cliclick c:1430,20')
+    time.sleep(0.1)
+    os.system('cliclick c:1300,100')
+    os.system('cliclick m:0,0')
     print('openNotification!')
+
 def openNotification_deep():
+    os.system('cliclick c:1430,20')
+    time.sleep(0.1)
+    os.system('cliclick c:1300,100')
+    time.sleep(0.1)
+    os.system('cliclick c:1300,100')
+    os.system('cliclick m:0,0')
     print('openNotification!Deep!')
 
 def mailSend(subject='A cool subject',
@@ -28,9 +41,12 @@ def mailSend(subject='A cool subject',
         recipient_list=[settings.RECIPIENT_ADDRESS])
     print('mailSend!')
 
+# 
 def unreadMailInfo(request): # return num of unread mails; content of these mails;
     unreads = Mail.objects.filter(unread=True).order_by('-created_at')
     unread_count = unreads.count()
+
+    #unread modify
     readmode = json.loads(request.body).get('readmode', 'noread')
     print(readmode)
     try:
@@ -51,24 +67,38 @@ def unreadMailInfo(request): # return num of unread mails; content of these mail
                 print(item.unread)
     except:
         pass
-            
+
+    # serialization
+    latest_mail = serialize_mail(unreads[0])
+    all_unread_mails = []
+    for item in unreads:
+        all_unread_mails.append(serialize_mail(item))
 
     return JsonResponse({
         'status': status.HTTP_200_OK,
-        'count': unread_count
+        'unread_count': unread_count,
+        'unread_preview': all_unread_mails,
+        'latest_preview': latest_mail
     })
 
 
-# def checkNewMail(): # return whether here is a new mail or not
+def checkNewMail(request): # return whether here is a new mail or not #for loop
+    mails = Mail.objects.order_by('-created_at')
+    unread_count = mails.filter(unread=True).count()
+
+    return JsonResponse({
+        'has_new': mails[0].unread,
+        'unread_count': unread_count
+        })
 
 
 class NotificationBoard(views.APIView): # open notification board
     def post(self, request, format=None):
         print(request.data)
         if request.data.get('deep', False):
-            openNotification()
-        else: 
             openNotification_deep()
+        else: 
+            openNotification()
         return JsonResponse({'status': status.HTTP_200_OK})
 
 class NewEmail(views.APIView): # post a new mail
