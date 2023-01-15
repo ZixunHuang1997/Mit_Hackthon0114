@@ -29,22 +29,33 @@ def mailSend(subject='A cool subject',
     print('mailSend!')
 
 def unreadMailInfo(request): # return num of unread mails; content of these mails;
-    unreads = Mail.objects.filter(unread = True).order_by('created_at')
-    if json.loads(request.body.get('readall', False)):
-        try:
+    unreads = Mail.objects.filter(unread=True).order_by('-created_at')
+    unread_count = unreads.count()
+    readmode = json.loads(request.body).get('readmode', 'noread')
+    print(readmode)
+    try:
+        if readmode=='readall': #readmode=='readone'/'readall'/'noread'
+            # print('readall')
+            unread_count = 0
             with transaction.atomic():
                 for item in unreads:
                     item.unread = False
                     item.save()
-        except Exception as e:
-            raise APIException(str(e))
-        
+                    print(item.unread)
+        elif readmode=='readone':
+            unread_count = max(unread_count - 1,0)
+            with transaction.atomic():
+                item = unreads[0]
+                item.unread = False
+                item.save()
+                print(item.unread)
+    except:
+        pass
+            
+
     return JsonResponse({
         'status': status.HTTP_200_OK,
-        'id': mail_item.id_code,
-        'subject': mail_item.name,
-        'message': mail_item.content,
-        'unread': mail_item.unread,
+        'count': unread_count
     })
 
 
@@ -68,16 +79,17 @@ class NewEmail(views.APIView): # post a new mail
         message = request.data.get('message','Empty Message')
         mailSend(subject=subject, message=message)
         # build database
-        try:
-            with transaction.atomic():
-                mail_item = Mail(
-                    name = subject,
-                    content = message,
-                    unread = True,
-                )
-                print("model creating!")
-        except Exception as e:
-            raise APIException(str(e))
+        # try:
+        with transaction.atomic():
+            mail_item = Mail(
+                name = subject,
+                content = message,
+                unread = True,
+            )
+            mail_item.save()
+            print("model creating!")
+        # except Exception as e:
+        #     raise APIException(str(e))
         return JsonResponse({
             'status': status.HTTP_200_OK,
             'id': mail_item.id_code,
@@ -97,8 +109,8 @@ class NewEmail(views.APIView): # post a new mail
 #     filter_class = MailFilter
 #     permission_classes = [permissions.AllowAny]
 
-#     def create(self, request, *args, **kwargs):
-#         category = request.data['category']
+#     def post(self, request, *args, **kwargs):
+#         readmode = request.data['category']
 #         try:
 #             with transaction.atomic():
 
