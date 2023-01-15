@@ -48,7 +48,12 @@ def unreadMailInfo(request): # return num of unread mails; content of these mail
     unread_count = unreads.count()
 
     #unread modify
-    readmode = json.loads(request.body).get('readmode', 'noread')
+    try:
+        readmode = json.loads(request.body).get('readmode', 'noread')
+    except:
+        readmode = request.data.get('readmode', 'noread')
+        
+    # readmode = request.data.get('readmode', 'noread')
     print(readmode)
     try:
         if readmode=='readall': #readmode=='readone'/'readall'/'noread'
